@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 DSM Quiz — Aprende Jugando</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #161929;
+    --border: #252a42;
+    --accent: #7c6fff;
+    --accent2: #ff6b9d;
+    --green: #3ddfa0;
+    --red: #ff5e7e;
+    --text: #e8eaf6;
+    --muted: #6b7099;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 30px 16px;
+  }
+
+  /* Fondo animado */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(124,111,255,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 30% at 10% 90%, rgba(255,107,157,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  header {
+    text-align: center;
+    padding-bottom: 8px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  /* ── SECCIÓN DE TEXTO ── */
+  .input-section label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 140px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 12px 14px;
+    resize: vertical;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+
+  textarea::placeholder { color: var(--muted); }
+
+  /* Palabras clave */
+  .keywords {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .keywords span {
+    font-size: 0.72rem;
+    background: rgba(124,111,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(124,111,255,0.3);
+    border-radius: 6px;
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+  }
+
+  .keywords span:hover { background: rgba(124,111,255,0.25); }
+
+  .keywords-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  /* Botones principales */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  button.primary {
+    flex: 1;
+    padding: 12px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  button.primary:hover { opacity: 0.88; }
+  button.primary:active { transform: scale(0.97); }
+
+  button.secondary {
+    padding: 12px 18px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  button.secondary:hover { color: var(--text); border-color: var(--muted); }
+
+  /* ── SECCIÓN DE JUEGO ── */
+  .game-section { display: none; }
+  .game-section.active { display: block; }
+
+  /* Barra de progreso */
+  .progress-bar-track {
+    background: var(--border);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  .score-badge {
+    background: rgba(61,223,160,0.12);
+    color: var(--green);
+    border: 1px solid rgba(61,223,160,0.25);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-weight: 500;
+  }
+
+  /* Pregunta */
+  #pregunta {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.45;
+    margin-bottom: 20px;
+    color: var(--text);
+    min-height: 60px;
+  }
+
+  /* Opciones */
+  #opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #opciones button {
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #opciones button:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(124,111,255,0.07);
+    transform: translateX(3px);
+  }
+
+  #opciones button.correct {
+    border-color: var(--green);
+    background: rgba(61,223,160,0.08);
+    color: var(--green);
+  }
+
+  #opciones button.incorrect {
+    border-color: var(--red);
+    background: rgba(255,94,126,0.08);
+    color: var(--red);
+  }
+
+  #opciones button:disabled { cursor: default; transform: none; }
+
+  .opt-letter {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  button.correct .opt-letter { background: var(--green); color: #0d0f1a; }
+  button.incorrect .opt-letter { background: var(--red); color: white; }
+
+  /* Feedback */
+  #resultado {
+    margin-top: 14px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-height: 24px;
+    text-align: center;
+    transition: opacity 0.3s;
+  }
+
+  /* Pantalla final */
+  .final-screen {
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .final-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .final-screen p {
+    color: var(--muted);
+    margin: 8px 0 20px;
+    font-size: 0.95rem;
+  }
+
+  /* Historial */
+  .history-section .section-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  .history-item:last-child { border-bottom: none; }
+
+  .history-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .history-q { color: var(--text); }
+
+  .history-a { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+  /* Sin preguntas */
+  .empty-state {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Animación entrada */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeUp 0.35s ease both; }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.6rem; }
+    #pregunta { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <h1>🧠 DSM Quiz</h1>
+    <p>Aprende criterios diagnósticos jugando</p>
+  </header>
+
+  <!-- SECCIÓN ENTRADA DE TEXTO -->
+  <div class="card input-section" id="inputSection">
+    <label>📋 Pega tu texto DSM aquí</label>
+    <textarea id="inputTexto" placeholder="Pega aquí el texto del DSM que quieres estudiar...&#10;&#10;Incluye palabras como: CRITERIO_A, DIAGNOSTICOS_DIFERENCIALES, TRATAMIENTO_PSICOLOGICO, o simplemente texto descriptivo con términos clínicos."></textarea>
+
+    <p class="keywords-label">💡 Palabras clave detectadas automáticamente — también puedes insertar ejemplos:</p>
+    <div class="keywords">
+      <span onclick="insertarTextoDemo('CRITERIO_A')">CRITERIO_A</span>
+      <span onclick="insertarTextoDemo('1 año')">1 año</span>
+      <span onclick="insertarTextoDemo('DIAGNOSTICOS_DIFERENCIALES')">DIAG. DIFER.</span>
+      <span onclick="insertarTextoDemo('TRATAMIENTO_PSICOLOGICO')">TRATAMIENTO</span>
+      <span onclick="cargarEjemplo()">📄 Cargar texto de ejemplo completo</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" onclick="generarPreguntas()">▶ Generar preguntas</button>
+      <button class="secondary" onclick="reiniciar()">↺ Reiniciar</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN JUEGO -->
+  <div class="card game-section" id="gameSection">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="barraProgreso" style="width:0%"></div>
+    </div>
+
+    <div class="progress-meta">
+      <span id="numProgreso">Pregunta 1 de 4</span>
+      <span class="score-badge" id="numPuntaje">⭐ 0 puntos</span>
+    </div>
+
+    <div id="pregunta">Cargando pregunta...</div>
+    <div id="opciones"></div>
+    <p id="resultado"></p>
+  </div>
+
+  <!-- HISTORIAL (aparece al terminar) -->
+  <div class="card history-section" id="historySection" style="display:none">
+    <div class="section-title">📖 Resumen de respuestas</div>
+    <div id="historialItems"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="primary" onclick="volverAInicio()">← Nuevo texto</button>
+      <button class="secondary" onclick="repetirJuego()">↺ Repetir</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let preguntas = JSON.parse(localStorage.getItem("preguntas")) || [];
+let actual = parseInt(localStorage.getItem("actual")) || 0;
+let puntaje = parseInt(localStorage.getItem("puntaje")) || 0;
+let historial = JSON.parse(localStorage.getItem("historial")) || [];
+
+function guardar() {
+  localStorage.setItem("preguntas", JSON.stringify(preguntas));
+  localStorage.setItem("actual", actual);
+  localStorage.setItem("puntaje", puntaje);
+  localStorage.setItem("historial", JSON.stringify(historial));
+}
+
+function insertarTextoDemo(palabra) {
+  const ta = document.getElementById("inputTexto");
+  if (!ta.value.includes(palabra)) {
+    ta.value += (ta.value ? "\n" : "") + palabra;
+  }
+}
+
+function cargarEjemplo() {
+  document.getElementById("inputTexto").value =
+`CRITERIO_A: Presencia de múltiples tics motores y al menos un tic vocal durante algún período de la enfermedad, aunque no necesariamente de manera simultánea.
+
+CRITERIO_B: Los tics pueden aparecer muchas veces al día, casi todos los días. La duración es mayor de 1 año sin ningún período libre de tics superior a 3 meses.
+
+DIAGNOSTICOS_DIFERENCIALES: Deben descartarse trastornos del movimiento estereotipado, corea de Sydenham, distonías y otros trastornos neurológicos.
+
+TRATAMIENTO_PSICOLOGICO: El abordaje de primera línea es la CBIT (Comprehensive Behavioral Intervention for Tics), que incluye entrenamiento en inversión de hábitos y terapia de exposición con prevención de respuesta.`;
+}
+
+function generarPreguntas() {
+  const texto = document.getElementById("inputTexto").value.trim();
+  if (!texto) {
+    alert("Por favor, pega o escribe algún texto DSM primero.");
+    return;
+  }
+
+  preguntas = [];
+  historial = [];
+
+  if (texto.includes("CRITERIO_A")) {
+    preguntas.push({
+      pregunta: "¿Qué describe principalmente el Criterio A en los trastornos de tics?",
+      opciones: ["La duración mínima del trastorno", "Los síntomas principales requeridos para el diagnóstico", "Las opciones de tratamiento disponibles"],
+      correcta: 1
+    });
+  }
+
+  if (texto.includes("1 año")) {
+    preguntas.push({
+      pregunta: "¿Cuál es la duración mínima requerida para considerar un trastorno de tics como crónico?",
+      opciones: ["3 meses", "6 meses", "1 año"],
+      correcta: 2
+    });
+  }
+
+  if (texto.includes("DIAGNOSTICOS_DIFERENCIALES")) {
+    preguntas.push({
+      pregunta: "¿Cuál de estas condiciones es un diagnóstico diferencial clave en los trastornos de tics?",
+      opciones: ["Trastorno de ansiedad generalizada", "Movimientos estereotipados y corea de Sydenham", "Episodio depresivo mayor"],
+      correcta: 1
+    });
+  }
+
+  if (texto.includes("TRATAMIENTO_PSICOLOGICO")) {
+    preguntas.push({
+      pregunta: "¿Cuál es el tratamiento psicológico de primera línea recomendado para los trastornos de tics?",
+      opciones: ["CBIT (Intervención conductual integral para tics)", "Psicoanálisis clásico", "Hipnoterapia"],
+      correcta: 0
+    });
+  }
+
+  // Preguntas generadas de texto libre
+  const palabrasClinicas = texto.match(/\b[A-ZÁÉÍÓÚÑ]{4,}\b/g) || [];
+  const unicas = [...new Set(palabrasClinicas)].filter(p =>
+    !["CRITERIO", "DIAGNOSTICOS", "TRATAMIENTO", "PSICOLOGICO", "DIFERENCIALES"].includes(p)
+  );
+
+  if (unicas.length >= 2 && preguntas.length < 6) {
+    preguntas.push({
+      pregunta: `¿Cuál de estos términos aparece en el texto DSM que estudiaste?`,
+      opciones: [unicas[0], "Fibromialgia", "Narcolepsia"],
+      correcta: 0
+    });
+  }
+
+  if (preguntas.length === 0) {
+    alert("No se detectaron palabras clave suficientes. Prueba el texto de ejemplo (botón '📄 Cargar texto de ejemplo completo').");
+    return;
+  }
+
+  actual = 0;
+  puntaje = 0;
+  guardar();
+
+  document.getElementById("inputSection").style.display = "none";
+  document.getElementById("gameSection").classList.add("active");
+  mostrarPregunta();
+}
+
+function mostrarPregunta() {
+  if (preguntas.length === 0) return;
+
+  const q = preguntas[actual];
+  const letras = ["A", "B", "C", "D"];
+
+  // Barra de progreso
+  const pct = ((actual) / preguntas.length) * 100;
+  document.getElementById("barraProgreso").style.width = pct + "%";
+  document.getElementById("numProgreso").innerText = `Pregunta ${actual + 1} de ${preguntas.length}`;
+  document.getElementById("numPuntaje").innerText = `⭐ ${puntaje} punto${puntaje !== 1 ? "s" : ""}`;
+
+  document.getElementById("pregunta").innerText = q.pregunta;
+  document.getElementById("resultado").innerText = "";
+
+  const opcionesDiv = document.getElementById("opciones");
+  opcionesDiv.innerHTML = "";
+
+  q.opciones.forEach((op, i) => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<span class="opt-letter">${letras[i]}</span>${op}`;
+    btn.onclick = () => responder(i);
+    opcionesDiv.appendChild(btn);
+  });
+}
+
+function responder(i) {
+  const q = preguntas[actual];
+  const botones = document.querySelectorAll("#opciones button");
+  botones.forEach(b => b.disabled = true);
+
+  const correcto = i === q.correcta;
+  if (correcto) puntaje++;
+
+  botones[i].classList.add(correcto ? "correct" : "incorrect");
+  botones[i].querySelector(".opt-letter").style.background = correcto ? "var(--green)" : "var(--red)";
+
+  if (!correcto) {
+    botones[q.correcta].classList.add("correct");
+    botones[q.correcta].querySelector(".opt-letter").style.background = "var(--green)";
+  }
+
+  document.getElementById("resultado").innerText = correcto ? "✅ ¡Correcto!" : "❌ Incorrecto — revisa la respuesta correcta";
+  document.getElementById("resultado").style.color = correcto ? "var(--green)" : "var(--red)";
+
+  historial.push({
+    pregunta: q.pregunta,
+    tuRespuesta: q.opciones[i],
+    correcta: q.opciones[q.correcta],
+    correcto
+  });
+
+  actual++;
+  guardar();
+
+  if (actual < preguntas.length) {
+    setTimeout(mostrarPregunta, 1200);
+  } else {
+    setTimeout(mostrarFinal, 1200);
+  }
+}
+
+function mostrarFinal() {
+  // Barra al 100%
+  document.getElementById("barraProgreso").style.width = "100%";
+
+  const total = preguntas.length;
+  const pct = Math.round((puntaje / total) * 100);
+  let emoji = pct >= 80 ? "🏆" : pct >= 50 ? "🎯" : "📚";
+  let msg = pct >= 80 ? "¡Excelente dominio del tema!" : pct >= 50 ? "Buen trabajo, sigue repasando." : "Repasa el material y vuelve a intentarlo.";
+
+  document.getElementById("pregunta").innerHTML = `
+    <div class="final-screen">
+      <div style="font-size:2.5rem">${emoji}</div>
+      <div class="final-score">${pct}%</div>
+      <p>${puntaje} de ${total} correctas · ${msg}</p>
+    </div>
+  `;
+  document.getElementById("opciones").innerHTML = "";
+  document.getElementById("resultado").innerText = "";
+  document.getElementById("numProgreso").innerText = "¡Completado!";
+
+  // Mostrar historial
+  const histSection = document.getElementById("historySection");
+  const histItems = document.getElementById("historialItems");
+  histItems.innerHTML = "";
+
+  historial.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+    div.innerHTML = `
+      <div class="history-icon">${item.correcto ? "✅" : "❌"}</div>
+      <div>
+        <div class="history-q">${item.pregunta}</div>
+        <div class="history-a">Tu respuesta: <strong>${item.tuRespuesta}</strong>${!item.correcto ? ` · Correcta: <strong>${item.correcta}</strong>` : ""}</div>
+      </div>
+    `;
+    histItems.appendChild(div);
+  });
+
+  histSection.style.display = "block";
+  histSection.scrollIntoView({ behavior: "smooth" });
+}
+
+function volverAInicio() {
+  localStorage.clear();
+  location.reload();
+}
+
+function repetirJuego() {
+  actual = 0;
+  puntaje = 0;
+  historial = [];
+  guardar();
+  document.getElementById("historySection").style.display = "none";
+  document.getElementById("resultado").innerText = "";
+  mostrarPregunta();
+  document.getElementById("gameSection").scrollIntoView({ behavior: "smooth" });
+}
+
+function reiniciar() {
+  if (confirm("¿Seguro que quieres reiniciar todo?")) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+// Si ya hay progreso guardado, cargarlo
+if (preguntas.length > 0 && actual < preguntas.length) {
+  document.getElementById("inputSection").style.display = "none";
+  document.getElementById("gameSection").classList.add("active");
+  mostrarPregunta();
+} else if (preguntas.length > 0 && actual >= preguntas.length) {
+  document.getElementById("inputSection").style.display = "none";
+  document.getElementById("gameSection").classList.add("active");
+  mostrarFinal();
+}
+</script>
+</body>
+</html>
